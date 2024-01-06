@@ -48,7 +48,6 @@ def transform(sample: dict) -> dict:
 
 
 if __name__ == "__main__":
-    # Create the parser
     parser = argparse.ArgumentParser(
         description="Transform dataset to the format of text_classification_multi_label of Vertex-AI"
     )
@@ -64,11 +63,11 @@ if __name__ == "__main__":
     files_path = Path(args.files_path)
 
     # read original dataset
-    if Path(files_path).is_dir():
-        sample_files = list(Path(files_path).glob("*json"))
+    if files_path.is_dir():
+        sample_files = list(files_path.glob("*json"))
         samples = [json.load(open(p)) for p in sample_files]
 
-    else:
+    elif str(files_path).endswith('zip'):
         with zipfile.ZipFile(files_path, "r") as zip_ref:
             sample_files = list(
                 filter(
@@ -77,6 +76,8 @@ if __name__ == "__main__":
                 )
             )
             samples = [json.load(open(p)) for p in sample_files]
+    else:
+        raise NotImplementedError("Not supported dataset format")
 
     # Get some statistics of tags
     tag_arrays = [x["tags"] for x in samples]
